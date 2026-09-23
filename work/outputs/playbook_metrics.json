@@ -1,1 +1,19 @@
-
+{
+  "slice": "2026-03 prior window; label = 2026-04/05 future window",
+  "queue_rows": 176738,
+  "flagged_rows": 1368,
+  "precision_at_20": 0.6,
+  "precision_at_50": 0.56,
+  "base_rate": 0.283,
+  "reason_code_counts": {
+    "not_flagged": 175109,
+    "visible_lowctr": 1368,
+    "stale_only": 255,
+    "stale_visible": 6
+  },
+  "action_label_counts": {
+    "no_action": 175364,
+    "review_ctr": 1368,
+    "review_staleness": 6
+  }
+}
