@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which pages should a content team review first? A ranked queue built on 176,738 pages</title>
+<style>
+  :root {
+    --fg: #1a202c;
+    --muted: #4a5568;
+    --accent: #2b6cb0;
+    --accent-2: #c53030;
+    --bg: #ffffff;
+    --rule: #e2e8f0;
+    --code-bg: #f7fafc;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+  }
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 1.25rem 6rem;
+  }
+  header.paper-title {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  h1 {
+    font-size: 1.65rem;
+    line-height: 1.3;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 1.15rem;
+    margin: 2.5rem 0 0.75rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--rule);
+    letter-spacing: -0.005em;
+  }
+  h3 {
+    font-size: 1rem;
+    margin: 1.5rem 0 0.5rem;
+  }
+  p, ul, ol { margin: 0 0 1rem; }
+  ul, ol { padding-left: 1.4rem; }
+  li { margin-bottom: 0.35rem; }
+  .meta {
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .meta a { color: var(--accent); }
+  .abstract {
+    background: var(--code-bg);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0 2rem;
+    font-size: 0.97rem;
+  }
+  .abstract strong { display: block; margin-bottom: 0.35rem; color: var(--muted); font-weight: 600; font-size: 0.82rem; letter-spacing: 0.05em; text-transform: uppercase; }
+  figure {
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+  }
+  figcaption {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-top: 0.5rem;
+    text-align: left;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.93rem;
+  }
+  th, td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+  }
+  th { background: var(--code-bg); font-weight: 600; }
+  code {
+    background: var(--code-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    font-size: 0.9em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.15em 0.5em;
+    border-radius: 3px;
+    background: var(--code-bg);
+    color: var(--muted);
+    margin-right: 0.4rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .callout {
+    border-left: 3px solid var(--accent-2);
+    padding: 0.5rem 1rem;
+    margin: 1rem 0;
+    background: #fff5f5;
+    color: #742a2a;
+    font-size: 0.95rem;
+  }
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  footer a { color: var(--accent); }
+  @media (max-width: 520px) {
+    main { padding: 2rem 1rem 4rem; }
+    h1 { font-size: 1.35rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header class="paper-title">
+  <h1>Which pages should a content team review first?<br>A ranked queue built on 176,738 pages</h1>
+  <p class="meta">
+    <strong>Zoye-J</strong> · FlyRank ML Internship · March 2026 prior window<br>
+    Repo: <a href="https://github.com/Zoye-J/FlyRank--MachineLearning">github.com/Zoye-J/FlyRank--MachineLearning</a>
+  </p>
+</header>
+
+<section class="abstract">
+  <strong>Abstract</strong>
+  <p>
+    Content teams with thousands of visible pages cannot review them all, so the real decision is
+    which pages to open first. I built a ranked review queue on 176,738 pages from FlyRank's
+    production search warehouse, using a 30-day prior window (March 2026) as features and a
+    two-month future window (April–May 2026) to define an observed decline label.
+    A hand-written rule scored pages by visibility × CTR-below-tier-median × impressions, and I
+    compared it against a logistic regression and a depth-3 decision tree on the same grouped
+    client split. The hand rule won at the top of the queue (Precision@50 = 0.52 vs 0.26 for
+    logistic regression), while the model's top ranks were dominated by low-impression noise.
+    The output is a ranked, reason-coded action queue a content editor can run in a weekly review
+    meeting plus a documented negative result showing where a learned model fails on this slice.
+  </p>
+</section>
+
+<h2>1. Introduction</h2>
+<p>
+  A portfolio of visible content has a triage problem. In the March 2026 slice used here,
+  176,738 pages had at least one GSC impression; a team reviewing 50 pages per week would need
+  more than sixty years to look at all of them once. The useful question is not "which pages are
+  declining"  28.3% of them are but "which of these should a human open first?"
+</p>
+<p>
+  This paper answers that question with a ranked queue. The queue is a decision-support tool:
+  it produces an ordered list of pages with a reason code and an action label, so a content
+  editor can spend their first hour of the week on the pages most likely to repay attention.
+</p>
+<p>
+  The deliverable is deliberately modest. It is a rule that works, a model that does not beat
+  it, and a public write-up of why. Honest negative results are more useful than an overstated
+  model, and on this slice the transparent rule is the right answer.
+</p>
+
+<h2>2. Data</h2>
+<p>
+  <strong>Release.</strong> FlyRank ML Internship warehouse
+  (<code>FlyRank/internship-warehouse</code>, build v20260703), a Hugging Face gated release
+  that mirrors FlyRank's production search stack. Public-safe: no client names, URLs, or raw
+  queries appear anywhere in this repo or this page.
+</p>
+<p><strong>Tables used.</strong></p>
+<ul>
+  <li><code>fact_content_daily_performance/month=2026-03</code>  daily per-page performance for the prior (feature) window.</li>
+  <li><code>fact_content_daily_performance/month=2026-04</code> and <code>month=2026-05</code>  the future window, used <em>only</em> to compute the evaluation label.</li>
+  <li><code>dim_content</code>  static page attributes (<code>content_type</code>, <code>main_intent</code>, <code>word_count</code>, <code>content_updated_date</code>).</li>
+</ul>
+<p><strong>Date windows.</strong></p>
+<ul>
+  <li>Prior (feature) window: <strong>2026-03-01 → 2026-03-31</strong>.</li>
+  <li>Future (label) window: <strong>2026-04-01 → 2026-05-31</strong>.</li>
+  <li>The final month (<code>month=2026-06</code>) is <strong>sealed</strong> and never touched.</li>
+</ul>
+<p><strong>Excluded fields and rows.</strong></p>
+<ul>
+  <li><code>trend_direction</code>, <code>trend_pct</code>  starter-CSV only; label sources.</li>
+  <li><code>is_declining_future</code>, <code>imp_mar</code>, <code>imp_apr_may</code>  the label and its inputs.</li>
+  <li><code>content_hash_id</code>, <code>client_hash_id</code>  pseudonyms; used for grouping and joining only, never as features.</li>
+  <li><code>ga4_*</code> when <code>ga4_data_available = FALSE</code>  zeros are fill, not measured engagement.</li>
+  <li><code>is_published</code>, <code>is_deleted</code>, <code>provider_used</code>, <code>model_used</code>  product-decision metadata.</li>
+  <li>All rows from <code>month=2026-06</code>  reserved as a sealed test month.</li>
+</ul>
+<p>
+  <strong>Grain check.</strong> One row of the fact table = one page-day
+  (<code>report_date, client_hash_id, content_hash_id</code>). Verified with a
+  <code>GROUP BY ... HAVING COUNT(*) &gt; 1</code> probe that returned zero rows.
+</p>
+
+<h2>3. Methodology</h2>
+<h3>Baseline (frozen)</h3>
+<p>A hand-written rule, readable on purpose:</p>
+<p><code>score = visible × low_ctr × impressions_30d</code></p>
+<p>
+  where <code>visible = impressions_30d ≥ 500</code>, and
+  <code>low_ctr = ctr_30d &lt; tier median</code> (tier = position bucket: top_3, page_1,
+  page_2, page_3_5, deep). Reason codes: <code>visible_lowctr</code>, <code>stale_visible</code>,
+  <code>stale_only</code>, <code>not_flagged</code>. Action labels: <code>review_ctr</code>,
+  <code>review_staleness</code>, <code>review_intent</code>, <code>no_action</code>.
+</p>
+<h3>Model</h3>
+<p>
+  Logistic Regression on five raw prior-window signals:
+  <code>impressions_30d</code>, <code>clicks_30d</code>, <code>ctr_30d</code>,
+  <code>avg_position_30d</code>, <code>days_since_update</code>. Secondary: a depth-3
+  decision tree. Gradient boosting and random forest were not tried, the logistic regression
+  already loses to the baseline, so adding complexity would not be honest.
+</p>
+<h3>Label</h3>
+<p>
+  <code>is_declining_future = 1</code> when the April–May impression sum is below 80% of the
+  March impression sum. Observed, not defined by a rule.
+</p>
+<h3>Validation</h3>
+<p>
+  <code>GroupShuffleSplit</code> by <code>client_hash_id</code>, <code>test_size=0.2</code>,
+  <code>random_state=42</code>. Zero client overlap between train and test verified.
+  This is the honest axis: a random split would let the model memorize client-specific patterns
+  and inflate its score.
+</p>
+<h3>Leakage checks</h3>
+<ol>
+  <li>Feature list and label sources audited programmatically — disjoint.</li>
+  <li>Train-without test on <code>clicks_30d</code>: P@50 unchanged, but coefficient magnitude
+      and top-of-list behavior disagree (see Results).</li>
+  <li>Deliberate leak: adding <code>imp_apr_may</code> as a feature jumps P@50 from 0.26 to 1.00,
+      the harness catches the leak, and it is deleted. The honest number is kept.</li>
+</ol>
+
+<h2>4. Results</h2>
+<p>
+  Both baseline and models were evaluated on the same grouped test set with the same metric.
+  Test-set base rate: <strong>0.186</strong>. Train base rate: 0.310.
+</p>
+
+<table>
+  <thead>
+    <tr><th>Model</th><th>P@20</th><th>P@50</th><th>P@100</th><th>AUC</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Random ranking</td><td>0.15</td><td>0.22</td><td>0.16</td><td>0.4976</td></tr>
+    <tr><td><strong>Week-4 hand rule (baseline)</strong></td><td><strong>0.45</strong></td><td><strong>0.52</strong></td><td><strong>0.45</strong></td><td>0.5088</td></tr>
+    <tr><td>Logistic Regression</td><td>0.25</td><td>0.26</td><td>0.36</td><td>0.5605</td></tr>
+    <tr><td>Decision Tree (depth 3)</td><td>0.25</td><td>0.20</td><td>0.15</td><td>0.5611</td></tr>
+  </tbody>
+</table>
+
+<p>
+  <strong>Reading.</strong> The hand rule wins at Precision@20 and Precision@50, the top of the
+  queue, where a human actually acts. Logistic regression has a slightly better AUC, meaning it
+  discriminates across the whole test set better, but its top-of-queue quality is worse because
+  it ranks low-impression noise first. The decision tree collapses at P@50.
+</p>
+
+<figure>
+  <img src="figures/action_mix.png" alt="Bar chart of action-label distribution on the March 2026 prior window">
+  <figcaption>
+    <strong>Figure 1.</strong> Action-label distribution on the ranked queue.
+    Most pages land in <code>no_action</code>; 1,368 pages carry <code>review_ctr</code>
+    (visible but underperforming their position tier), 6 carry <code>review_staleness</code>.
+    The queue is deliberately narrow at the top and the rule trades coverage for precision.
+  </figcaption>
+</figure>
+
+<figure>
+  <img src="figures/score_by_rank.png" alt="Line chart of baseline score by rank, top 5,000 rows">
+  <figcaption>
+    <strong>Figure 2.</strong> Baseline score by rank (top 5,000 rows). The steep dropoff confirms
+    that the signal is concentrated in the very top of the queue: roughly the first 1,300 rows
+    carry non-zero score, then the ranking falls off to zero. Any review process should focus
+    on the top of the list, not spread attention across the whole tail.
+  </figcaption>
+</figure>
+
+<h3>Error analysis</h3>
+<p>
+  The top-50 false positives from logistic regression have a median of 3 impressions and a mean
+  of 5,659  dominated by effectively-zero-traffic pages, with a handful of giants pulling
+  the mean up. The model has learned "no clicks → likely decline," which is trivially true and
+  useless as a review queue. The 51–200 rank bucket declines at 47.3%, well above the base rate:
+  the model has signal, it just ranks it too low.
+</p>
+<div class="callout">
+  <strong>The one-line finding.</strong> On this slice, a transparent hand rule beats a logistic
+  regression at the metric that matters. The model's advantage is confined to the middle of the
+  ranking, where a review team would not act first.
+</div>
+
+<h2>5. Limitations &amp; honest framing</h2>
+<ul>
+  <li><span class="tag">decision-support</span> This is decision-support, not causal. The label is observed, but the analysis is cross-sectional. No claim that "fixing CTR causes recovery" is supported.</li>
+  <li><span class="tag">observed</span> One month, one portfolio. March 2026 prior window, April–May 2026 label, 47 clients in the modeling frame. Results may not generalize.</li>
+  <li><span class="tag">measured</span> Grouped by client, not by time. Features come from one window and labels from a later window, so the temporal axis is already honest. The generalization axis tested here is "unseen clients," not "unseen future months."</li>
+  <li><span class="tag">directional</span> The baseline wins at P@50. LR does not beat the hand rule at the top of the queue on this slice. The model's AUC advantage (0.56 vs 0.51) does not translate into better top-of-queue quality.</li>
+  <li><span class="tag">measured</span> Staleness could not be used as a filter. <code>content_updated_date</code> behaves like a sync artifact in this release 84.2% of rows have negative <code>days_since_update</code>. Staleness is retained only as a reason-code booster.</li>
+  <li><span class="tag">scope</span> Not a security tool. Nothing in this work detects malicious, deceptive, or abusive content. Unusual combinations are surfaced for human review, not as alarms.</li>
+</ul>
+
+<h2>6. Ranked recommendations</h2>
+<p>The action playbook, ordered by what a content team should do first.</p>
+<ol>
+  <li>
+    <strong>Rewrite title/meta on the top of the <code>review_ctr</code> queue.</strong>
+    1,368 pages flagged. The top row alone has 80,821 impressions at 0.04% CTR, ranking 1.5 
+    a large, cheap-to-test upside.
+  </li>
+  <li>
+    <strong>Add a minimum-impressions floor to any future model.</strong>
+    LR's top-50 ranks were dominated by 3-impression pages. The baseline's
+    <code>visible ≥ 500</code> floor is what makes it win at P@50.
+  </li>
+  <li>
+    <strong>Do not deploy the LR as the primary ranker.</strong>
+    It loses to the hand rule on the same split at the metric that matters (P@50).
+  </li>
+  <li>
+    <strong>Re-audit the CTR-vs-tier interaction explicitly.</strong>
+    The rule captures it as an interaction; LR sees only raw CTR and misses it. A future model
+    could add <code>ctr_rel_tier = ctr_30d − tier_median_ctr</code> as a feature.
+  </li>
+  <li>
+    <strong>Hold off on staleness-based filtering</strong> until <code>content_updated_date</code>
+    is fixed upstream.
+  </li>
+  <li>
+    <strong>Treat the queue as decision-support.</strong>
+    No automated edits, no auto-publish. Human review stays in the loop.
+  </li>
+</ol>
+
+<h2>7. Reproducibility</h2>
+<p>
+  Every number on this page traces back to a notebook in
+  <a href="https://github.com/Zoye-J/FlyRank--MachineLearning/tree/main/work/notebooks">work/notebooks</a>.
+  Run order:
+</p>
+<ol>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w01_research_question.ipynb">w01_research_question.ipynb</a>  research question and lane.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w02_ml_task_framing.ipynb">w02_ml_task_framing.ipynb</a>  framing as a ranking/scoring task.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w03_data_contract.ipynb">w03_data_contract.ipynb</a>  data contract and verification queries.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w03_feature_leakage_check.ipynb">w03_feature_leakage_check.ipynb</a>  feature vector and the deliberate-leak experiment.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w04_signal_audit.ipynb">w04_signal_audit.ipynb</a>  signal audit and flag-linked verdicts.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w04_baseline_score.ipynb">w04_baseline_score.ipynb</a>  the frozen baseline and ranked queue.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w05_model.ipynb">w05_model.ipynb</a> — logistic regression and decision tree under a grouped split.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w06_validation_audit.ipynb">w06_validation_audit.ipynb</a>  validation audit and claim rewrite.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/w07_action_playbook.ipynb">w07_action_playbook.ipynb</a> action playbook, exports, and figures.</li>
+  <li><a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/notebooks/capstone.ipynb">capstone.ipynb</a> this paper's mirror notebook.</li>
+</ol>
+<p>
+  <strong>Environment.</strong> Python 3.13 (Colab), duckdb, pandas, numpy, matplotlib,
+  scikit-learn. All randomness is seeded (<code>random_state=42</code> throughout).
+  Data access is read-only via a Hugging Face READ token stored as a Colab Secret named
+  <code>HF_TOKEN</code> never committed.
+</p>
+<p>
+  <strong>Outputs.</strong>
+  <a href="https://github.com/Zoye-J/FlyRank--MachineLearning/blob/main/work/outputs/playbook_metrics.json"><code>work/outputs/playbook_metrics.json</code></a>
+  holds the standing metrics. Figures regenerate on every run of
+  <code>w07_action_playbook.ipynb</code> and are committed at
+  <a href="https://github.com/Zoye-J/FlyRank--MachineLearning/tree/main/docs/figures"><code>docs/figures/</code></a>.
+</p>
+
+<h2>8. Acknowledgments &amp; data credit</h2>
+<p>
+  Built on the <a href="https://flyrank.ai">FlyRank ML Internship dataset</a>.
+  The warehouse release, the internship framework, and the lane guidance all come from FlyRank.
+  Any errors in framing, modeling, or interpretation are my own.
+</p>
+
+<footer>
+  <p>
+    Paper: “Which pages should a content team review first? A ranked queue built on 176,738 pages” ·
+    Zoye-J, FlyRank ML Internship, March 2026.
+    Source: <a href="https://github.com/Zoye-J/FlyRank--MachineLearning">github.com/Zoye-J/FlyRank--MachineLearning</a>.
+  </p>
+  <p>
+    This page uses the claim ladder throughout — <em>observed / measured / directional /
+    decision-support</em>. No causal claim, no Google-algorithm claim, no client-identifying
+    detail.
+  </p>
+</footer>
+
+</main>
+</body>
+</html>
